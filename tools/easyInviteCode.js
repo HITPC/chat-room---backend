@@ -1,6 +1,6 @@
 class easyIC { // 用于生成简单加密（验证邀请码？好像后端验证好一点？）
   // （目前不做很难的了，仅考虑全为字母无空格以及长度不超过26位的字符串，包括密钥）
-  constructor(serect="intial", result){
+  constructor(serect="intial", result, used){
     // 构造函数只需要一个密钥， 以及未加密之前的明文
     if(typeof serect !== "string"){
       throw new Error("wrong type of serect! Need a String!");
@@ -8,6 +8,10 @@ class easyIC { // 用于生成简单加密（验证邀请码？好像后端验�
       throw new Error("no result!");
     }else if(!Array.isArray(result)){
       throw new Error("wrong type of result! Need a Array!");
+    }else if(!used){
+      throw new Error("no used!");
+    }else if(typeof used !== "object"){
+      throw new Error("wrong type of used! Need a Object!");
     }
     result.forEach((item)=>{
       if(typeof item !== "string"){
@@ -30,6 +34,7 @@ class easyIC { // 用于生成简单加密（验证邀请码？好像后端验�
     }
     this.serect = serect;
     this.result = result;
+    this.isUsed = used;
     let t = 0;
     for(let i = 0; i<serect.length; ++i){
       t += serect.charCodeAt(i);
@@ -170,7 +175,6 @@ class easyIC { // 用于生成简单加密（验证邀请码？好像后端验�
       // 拿到的第二个是小写字母
       realLeave = secondPoint.charCodeAt() - 'a'.charCodeAt();
       realLength = (leave-1) * 10 + realLeave;
-      console.log(realLength);
       index += 2 + leave + 1 + realLeave + 1;// 指针到初始位置上去
       while(i < realLength){
         temp += item.charAt(index);
@@ -205,7 +209,9 @@ class easyIC { // 用于生成简单加密（验证邀请码？好像后端验�
     let res = this.decode(toDecodeArr);
     let temp = 0;
     res.forEach((item)=>{
-      console.log(item);
+      if(this.isUsed[res]){
+        return false;
+      }
       if(this.result.includes(item)){
         ++temp;
       }
@@ -219,4 +225,4 @@ class easyIC { // 用于生成简单加密（验证邀请码？好像后端验�
 }
 
 const config = require("../config/inviteCode.config");
-module.exports = new easyIC(config.serect, config.list);
+module.exports = new easyIC(config.serect, config.list, config.isUsed);
