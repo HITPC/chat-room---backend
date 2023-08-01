@@ -218,4 +218,5 @@ class easyIC { // 用于生成简单加密（验证邀请码？好像后端验�
   }
 }
 
-module.exports = easyIC;
+const config = require("../config/inviteCode.config");
+module.exports = new easyIC(config.serect, config.list);
