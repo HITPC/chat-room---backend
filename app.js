@@ -20,6 +20,7 @@ const cors = require("cors");
 // 导入路由
 // var test = require('./routes/API/test.js');
 var loginAndRegister = require("./routes/API/loginAndRegister.js");
+var getData = require("./routes/API/getData.js");
 
 var app = express();
 
@@ -57,6 +58,7 @@ app.use(session({
 // 注册路由 允许同一个根路径，不同的不会顶替，相同的谁在前面谁有效
 // app.use('/', test);
 app.use("/", loginAndRegister);
+app.use("/", getData);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

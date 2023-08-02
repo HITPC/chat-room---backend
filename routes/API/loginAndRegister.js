@@ -1,4 +1,3 @@
-// 该文件仅用于打个样子
 var express = require('express');
 var router = express.Router();
 //拿到user的数据库模型

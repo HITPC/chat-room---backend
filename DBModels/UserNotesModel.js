@@ -1,21 +1,17 @@
 //导包
 const mongoose = require("mongoose");
 //创建文档结构对象 声明各属性都是什么数据类型的(约束本集合中文档的属性及属性值的类型)
-let MessageSchema = new mongoose.Schema({
-  fromName: {
+let UserNotesSchema = new mongoose.Schema({
+  belongToId: {
     type: String,
-    required: true,
-  },
-  fromId: {
-    type: String,
-    required: true,
-  },
-  fromVIP: {
-    type: Boolean,
     required: true,
   },
   message: {
     type: String,
+    required: true,
+  },
+  userName: {
+    type :String,
     required: true,
   },
   date: {
@@ -24,6 +20,6 @@ let MessageSchema = new mongoose.Schema({
   }
 });
 //创建模型对象 对文档操作的封装对象(增删改查均可) 第一个参数要求集合名称 第二个参数要求文档结构对象
-let MessageModel = new mongoose.model("messages", MessageSchema);
+let UserNotesModel = new mongoose.model("usernotes", UserNotesSchema);
 
-module.exports = MessageModel;
+module.exports = UserNotesModel;
