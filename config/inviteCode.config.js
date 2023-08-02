@@ -5,7 +5,13 @@ module.exports = {
     "liuxiaojun",
     "houxin",
     "zhanghao",
-    "wangjiayi"
+    "wangjiayi",
+    "wanjinhao",
+    "liujunhao",
+    "luhaitian",
+    "sunsiyuan",
+    "dupeiyu",
+    "guoyuzhong",
   ],
   isUsed: {
     gaoshuo: false,
@@ -13,5 +19,11 @@ module.exports = {
     houxin: false,
     zhanghao: false,
     wangjiayi: false,
+    wanjinhao: false,
+    liujunhao: false,
+    luhaitian: false,
+    sunsiyuan: false,
+    dupeiyu: false,
+    guoyuzhong: false,
   },
 }

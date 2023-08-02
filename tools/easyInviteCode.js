@@ -116,6 +116,10 @@ class easyIC { // 用于生成简单加密（验证邀请码？好像后端验�
     return res;
   }
 
+  encodeOne(str){
+    return this.doEncode(str);
+  }
+
   encodeAll(){// 将result的内容全部加密
     let obj = {};
     this.result.forEach((item)=>{
@@ -192,9 +196,11 @@ class easyIC { // 用于生成简单加密（验证邀请码？好像后端验�
       resArr.push(temp);
       temp = "";
     });
-
-    
     return resArr;
+  }
+
+  decodeOne(str){
+    return this.decode([str])[0];
   }
   
   judge(toDecodeArr){// 判断码到底对不对

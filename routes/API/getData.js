@@ -20,7 +20,7 @@ const disableCache = require("../../midwares/desableCache");
 router.get("/userList", checkToken, disableCache,  (req, res)=>{
   UserModel.find().then((data)=>{
     if(!data || data.length == 0){
-      res.json({
+      res.status(201).json({
         code: 201,
         msg: "data is empty",
         data: []
@@ -38,14 +38,14 @@ router.get("/userList", checkToken, disableCache,  (req, res)=>{
         userTrueName: item.userTrueName,
       });
     });
-    res.json({
+    res.status(200).json({
       code: 200,
       msg: "success",
       data: resArr
     });
   }).catch((error)=>{
     console.log(error);
-    res.json({
+    res.status(500).json({
       code: 500,
       msg: "find error!",
       data: null
@@ -65,14 +65,14 @@ router.get("/getUserData", checkToken, disableCache,  (req, res)=>{
         userType: data.userType,
         userTrueName: data.userTrueName,
       };
-      res.json({
+      res.status(200).json({
         code: 200,
         msg: "success",
         data: obj
       });
       return;
     }else{
-      res.json({
+      res.status(502).json({
         code: 502,
         msg: "not found!",
         data: null
@@ -80,7 +80,7 @@ router.get("/getUserData", checkToken, disableCache,  (req, res)=>{
     }
   }).catch((error)=>{
     console.log(error);
-    res.json({
+    res.status(500).json({
       code: 500,
       msg: "find error!",
       data: null
@@ -101,14 +101,14 @@ router.get("/getMyData", checkToken, disableCache,  (req, res)=>{
         userType: data.userType,
         userTrueName: data.userTrueName,
       };
-      res.json({
+      res.status(200).json({
         code: 200,
         msg: "success",
         data: obj
       });
       return;
     }else{
-      res.json({
+      res.status(502).json({
         code: 502,
         msg: "not found!",
         data: null
@@ -116,7 +116,7 @@ router.get("/getMyData", checkToken, disableCache,  (req, res)=>{
     }
   }).catch((error)=>{
     console.log(error);
-    res.json({
+    res.status(500).json({
       code: 500,
       msg: "find error!",
       data: null
@@ -128,20 +128,25 @@ router.get("/getMyData", checkToken, disableCache,  (req, res)=>{
 router.get("/getIndexMessageList", checkToken, disableCache, (req, res)=>{
   NotesModel.find().then((data)=>{
     if(!data || data.length == 0){
-      res.json({
+      res.status(201).json({
         code: 201,
         msg: "data is empty",
         data: []
       });
       return;
     }
-    res.json({
+    res.status(200).json({
       code: 200,
       msg: "success",
       data: data
     });
   }).catch((error)=>{
     console.log(error);
+    res.status(500).json({
+      code: 500,
+      msg: "unknow error!",
+      data: null
+    });
   });
 });
 
@@ -156,7 +161,7 @@ router.post("/createIndexMessage", checkToken, disableCache, (req, res)=>{
     date
   }).then((data)=>{
     if(data){
-      res.json({
+      res.status(200).json({
         code: 200,
         msg: "success",
         data: null
@@ -164,7 +169,7 @@ router.post("/createIndexMessage", checkToken, disableCache, (req, res)=>{
     }
   }).catch((error)=>{
     console.log(error);
-    res.json({
+    res.status(500).json({
       code: 500,
       msg: "create error",
       data: null
@@ -176,20 +181,25 @@ router.post("/createIndexMessage", checkToken, disableCache, (req, res)=>{
 router.get("/getUserMessageList", checkToken, disableCache, (req, res)=>{
   UserNotesModel.find({belongToId: req.query.belongToId}).then((data)=>{
     if(!data || data.length == 0){
-      res.json({
+      res.status(201).json({
         code: 201,
         msg: "data is empty",
         data: []
       });
       return;
     }
-    res.json({
+    res.status(200).json({
       code: 200,
       msg: "success",
       data: data
     });
   }).catch((error)=>{
     console.log(error);
+    res.status(500).json({
+      code: 500,
+      msg: "unknow error",
+      data: null
+    });
   });
 });
 
@@ -206,7 +216,7 @@ router.post("/createUserMessage", checkToken, disableCache, (req, res)=>{
     date
   }).then((data)=>{
     if(data){
-      res.json({
+      res.status(200).json({
         code: 200,
         msg: "success",
         data: null
@@ -214,7 +224,7 @@ router.post("/createUserMessage", checkToken, disableCache, (req, res)=>{
     }
   }).catch((error)=>{
     console.log(error);
-    res.json({
+    res.status(500).json({
       code: 500,
       msg: "create error",
       data: null
@@ -222,6 +232,7 @@ router.post("/createUserMessage", checkToken, disableCache, (req, res)=>{
   });
 });
 
+// 根据房间id返回聊天室中的消息列表
 
 
 

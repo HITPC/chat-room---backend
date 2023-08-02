@@ -21,6 +21,7 @@ const cors = require("cors");
 // var test = require('./routes/API/test.js');
 var loginAndRegister = require("./routes/API/loginAndRegister.js");
 var getData = require("./routes/API/getData.js");
+var operations = require("./routes/API/doOperations");
 
 var app = express();
 
@@ -59,6 +60,7 @@ app.use(session({
 // app.use('/', test);
 app.use("/", loginAndRegister);
 app.use("/", getData);
+app.use("/", operations);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
