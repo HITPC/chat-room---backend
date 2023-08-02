@@ -3,6 +3,10 @@ var express = require('express');
 var router = express.Router();
 // 拿到user的数据库模型
 const UserModel = require("../../DBModels/UserModel");
+// 邀请码模型
+const InviteCodeModel = require("../../DBModels/InviteCodeModel");
+// VIP码模型
+const VIPCodeModel = require("../../DBModels/VIPCodeMedel");
 
 // 鉴权
 const checkToken = require("../../midwares/checkToken");
@@ -26,13 +30,40 @@ router.get("/getInviteCode", checkToken, disableCache, (req, res)=>{
       data: null
     });
   }
+  
   UserModel.findOne({_id}).then((data)=>{
     if(data){
       if(data.userType === "admin"){
-        res.status(200).json({
-          code: 200,
-          msg: "success",
-          data: inviteCode.encodeOne(realName)
+        InviteCodeModel.findOne({name: realName}).then((data)=>{
+          if(data){
+            res.status(208).json({
+              code: 208,
+              msg: "this name already get one",
+              data: null,
+            });
+          }else{
+            InviteCodeModel.create(
+              {name: realName, isUsed: false}
+            ).then((data)=>{
+              res.status(200).json({
+                code: 200,
+                msg: "success",
+                data: inviteCode.encodeOne(realName)
+              });
+            }).catch((error)=>{
+              res.status(503).json({
+                code: 503,
+                msg: "invite create error",
+                data: null
+              });
+            });
+          }
+        }).catch((error)=>{
+          res.status(504).json({
+            code: 504,
+            msg: "invite find error",
+            data: null
+          });
         });
       }else{
         res.status(502).json({
@@ -66,10 +97,21 @@ router.get("/getVIPCode", checkToken, disableCache, (req, res)=>{
   UserModel.findOne({_id}).then((data)=>{
     if(data){
       if(data.userType === "admin"){
-        res.status(200).json({
-          code: 200,
-          msg: "success",
-          data: vipCodeVerifier.getCode()
+        let code = vipCodeVerifier.getCode();
+        // 存进去
+        VIPCodeModel.create({code, isUsed: false}).then((data)=>{
+          res.status(200).json({
+            code: 200,
+            msg: "success",
+            data: code
+          });
+        }).catch((error)=>{
+          console.log(error);
+          res.status(507).json({
+            code: 507,
+            msg: "insert code in db error!",
+            data: null
+          })
         });
       }else{
         res.status(502).json({
@@ -109,28 +151,50 @@ router.post("/enableVIP", checkToken, disableCache, (req, res)=>{
           data: null
         });
       }else{
-        if(vipCodeVerifier.verifyCode(code)){
-          UserModel.updateOne({_id}, {userVIP: true}).then((data)=>{
-            res.status(200).json({
-              code: 200,
-              msg: "success!",
+        VIPCodeModel.findOne({code}).then((data)=>{
+          if(data){
+            if(data.isUsed){
+              res.status(204).json({
+                code: 202,
+                msg: "used code!",
+                data: null
+              });
+            }else{
+              UserModel.updateOne({_id}, {userVIP: true}).then((data)=>{
+                res.status(200).json({
+                  code: 200,
+                  msg: "success!",
+                  data: null
+                });
+                VIPCodeModel.updateOne({code}, {isUsed: true}).then(()=>{
+
+                }).catch((error)=>{
+                  console.log(error);
+                  res.status(509).json({
+                    code: 509,
+                    msg: "update code state error!",
+                    data: null
+                  });
+                })
+              }).catch((error)=>{
+                console.log(error);
+                res.status(505).json({
+                  code: 505,
+                  msg: "update error!",
+                  data: null
+                });
+              });
+            }
+          }else{
+            res.status(203).json({
+              code: 203,
+              msg: "wrong code!",
               data: null
             });
-          }).catch((error)=>{
-            console.log(error);
-            res.status(505).json({
-              code: 505,
-              msg: "update error!",
-              data: null
-            });
-          });
-        }else{
-          res.status(503).json({
-            code: 503,
-            msg: "wrong code!",
-            data: null
-          });
-        }
+          }
+        }).catch((error)=>{
+          console.log(error);
+        });
       }
     }else{
       res.status(502).json({
