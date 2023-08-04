@@ -30,6 +30,10 @@ let UserSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
+  belongRoom: {
+    type: Array,
+    default: [],
+  }
 });
 //创建模型对象 对文档操作的封装对象(增删改查均可) 第一个参数要求集合名称 第二个参数要求文档结构对象
 let UserModel = new mongoose.model("users", UserSchema);

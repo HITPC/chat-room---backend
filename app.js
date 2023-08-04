@@ -16,14 +16,20 @@ const mongoose = require('mongoose');
 // 导入cors配置跨域
 const cors = require("cors");
 
-
+var app = express();
+// 导入websocket
+const expressWs = require('express-ws')(app);
+app.use(function (req, res, next) {
+  req.ws = expressWs.getWss();
+  next();
+})
 // 导入路由
 // var test = require('./routes/API/test.js');
 var loginAndRegister = require("./routes/API/loginAndRegister.js");
 var getData = require("./routes/API/getData.js");
 var operations = require("./routes/API/doOperations");
-
-var app = express();
+var roomHttp = require("./routes/API/chatRoom-http.js");
+// var roomWS = require("./routes/API/chatRoom-ws.js");
 
 // 连接到数据库，必须要做的一步！
 mongoose.connect(`mongodb://${dbConfig.DBHOST}:${dbConfig.DBPORT}/${dbConfig.DBNAME}`, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -61,6 +67,8 @@ app.use(session({
 app.use("/", loginAndRegister);
 app.use("/", getData);
 app.use("/", operations);
+app.use("/", roomHttp);
+// app.use("/", roomWS);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

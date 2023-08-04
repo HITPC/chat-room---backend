@@ -94,6 +94,7 @@ router.post("/register", (req, res) => {
                 userTheme: 9,
                 userType: "normal",
                 userTrueName: eic.decode([inviteCode])[0],
+                belongRoom: "",
               })
                 .then(data => {
                   // 创建成功，发回注册成功

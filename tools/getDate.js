@@ -1,4 +1,4 @@
-module.exports = (type) => {
+module.exports = (type = 'today') => {
   // 获取当前日期
   let timestamp = Date.parse(new Date());
   let date = new Date(timestamp);
