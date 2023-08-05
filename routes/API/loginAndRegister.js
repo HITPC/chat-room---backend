@@ -36,7 +36,7 @@ router.post("/login", (req, res)=>{
       );
       //对上之后返回token
       res.cookie('token', token, {maxAge: 7 * 24 * 3600 * 1000});
-      req.session.username = data.username; // 保存session
+      // req.session.username = data.username; // 保存session 好像没用的
       res.status(200).json({
         code: 200,
         msg: "success",
@@ -94,7 +94,7 @@ router.post("/register", (req, res) => {
                 userTheme: 9,
                 userType: "normal",
                 userTrueName: eic.decode([inviteCode])[0],
-                belongRoom: "",
+                belongRoom: [],
               })
                 .then(data => {
                   // 创建成功，发回注册成功

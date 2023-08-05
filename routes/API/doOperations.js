@@ -154,8 +154,8 @@ router.post("/enableVIP", checkToken, disableCache, (req, res)=>{
         VIPCodeModel.findOne({code}).then((data)=>{
           if(data){
             if(data.isUsed){
-              res.status(204).json({
-                code: 202,
+              res.status(250).json({
+                code: 250,
                 msg: "used code!",
                 data: null
               });

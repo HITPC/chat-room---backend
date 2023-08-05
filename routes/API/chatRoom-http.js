@@ -310,9 +310,11 @@ router.post("/sendMessage", checkToken, disableCache, async (req, res)=>{
 });
 
 // 进入房间 ++房间人数 加自己到列表上
+// 进入房间 ++房间人数 加自己到列表上
 router.get("/inRoom", checkToken, disableCache, (req, res)=>{
   let { _id, username } = req.user;
   let { roomId } = req.query;
+  // console.log(typeof roomId);
   if(!roomId){
     res.status(500).json({
       code: 500,
@@ -323,47 +325,68 @@ router.get("/inRoom", checkToken, disableCache, (req, res)=>{
   }
   RoomModel.findOne({_id: roomId}).then((data)=>{
     if(data){
-      // 如果已经在里面了，就不加了？还是不用处理？
-      // 别的人记得加到自己属于这个房间里
-      UserModel.findOne({_id}).then((data)=>{
-        if(data){
-          UserModel.updateOne({_id}, { $push: { belongRoom: roomId } }).then(()=>{}).catch((error)=>{
-            res.status(504).json({
-              code: 504,
-              msg: "update user failed!",
+      // 如果已经在里面了，就不加了
+      UserModel.findOne({_id, belongRoom: roomId}).then((userData)=>{
+        if(!userData){
+          // 说明没有，可以加上
+          UserModel.findOne({_id}).then((userData0)=>{
+            if(userData0){
+              UserModel.updateOne({_id}, { $push: { belongRoom: roomId } }).then(()=>{}).catch((error)=>{
+                console.log(error);
+                res.status(504).json({
+                  code: 504,
+                  msg: "update user failed!",
+                  data: null
+                });
+                return;
+              });
+              RoomModel.updateOne({_id: roomId}, {$inc: {roomPeopleNumber: 1}})
+              .then((d)=>{
+                res.status(200).json({
+                  code: 200,
+                  msg: "success!",
+                  data: null
+                });
+              }).catch((e)=>{
+                console.log(e);
+                res.status(501).json({
+                  code: 501,
+                  msg: "update failed!",
+                  data: null
+                });
+                return;
+              });
+            }else{
+              res.status(503).json({
+                code: 503,
+                msg: "find user failed!",
+                data: null
+              });
+            }
+          }).catch((error)=>{
+            console.log(error);
+            res.status(502).json({
+              code: 502,
+              msg: "find user failed!",
               data: null
             });
           });
         }else{
-          res.status(503).json({
-            code: 503,
-            msg: "find user failed!",
-            data: null
-          });
-        }
-      }).catch((error)=>{
-        console.log(error);
-        res.status(502).json({
-          code: 502,
-          msg: "find user failed!",
-          data: null
-        });
-      });
-      RoomModel.updateOne({_id: data._id}, {roomPeopleNumber: data.roomPeopleNumber+1})
-        .then((d)=>{
+          // 不加了 直接放行
           res.status(200).json({
             code: 200,
             msg: "success!",
             data: null
           });
-        }).catch((e)=>{
-          console.log(e);
-          res.status(501).json({
-            code: 501,
-            msg: "update failed!",
-            data: null
-          });
+        }
+      }).catch((error)=>{
+        console.log(error);
+        res.status(507).json({
+          code: 507,
+          msg: "find arr erorr!",
+          data: null
         });
+      });
     }else{  
       //
       res.status(204).json({
@@ -382,97 +405,98 @@ router.get("/inRoom", checkToken, disableCache, (req, res)=>{
   });
 });
 
-// 离开房间 --房间人数
-router.get("/leaveRoom", checkToken, disableCache, (req, res)=>{
-  let { _id } = req.user;
-  let { roomId } = req.query;
-  if(!roomId){
-    res.status(500).json({
-      code: 500,
-      msg: "server error!",
-      data: null
-    });
-    return;
-  }
-  RoomModel.findOne({_id: roomId}).then((data)=>{
-    if(data){
-      if(data.roomPeopleNumber - 1 == 0){// 人走完房间里没人了
-        // 移除这个人不再属于这个房间
-        UserModel.updateOne({_id}, {$pull: {belongRoom: roomId}}).then((data)=>{
-        }).catch((error)=>{
-          console.log(error);
-          res.status(503).json({
-            code: 503,
-            msg: "people failed",
-            data: null
-          });
-        });
-        // 删了这个房间就好
-        RoomModel.deleteOne({_id: roomId}).then((data)=>{
-          if(data.deletedCount === 1){
-            res.status(200).json({
-              code: 200,
-              msg: "success",
-              data: null
-            });
-          }else{
-            res.status(206).json({
-              code: 206,
-              msg: "delete no one",
-              data: null
-            });
-          }
-        }).catch((error)=>{
-          console.log(error);
-          res.status(502).json({
-            code: 502,
-            msg: "delete room failed!",
-            data: null
-          });
-        });
-        return;
-      }
-      // 人走完房间里还有人
-      RoomModel.updateOne({_id: data._id}, {roomPeopleNumber: data.roomPeopleNumber-1})
-        .then((d)=>{
-          // 移除这个人不再属于这个房间
-          UserModel.updateOne({_id}, {$pull: {belongRoom: roomId}}).then((data)=>{
-            res.status(200).json({
-              code: 200,
-              msg: "success!",
-              data: null
-            });
-          }).catch((error)=>{
-            console.log(error);
-            res.status(503).json({
-              code: 503,
-              msg: "people failed",
-              data: null
-            });
-          });
-        }).catch((e)=>{
-          console.log(e);
-          res.status(501).json({
-            code: 501,
-            msg: "update failed!",
-            data: null
-          });
-        });
-    }else{  
-      res.status(500).json({
-        code: 500,
-        msg: "failed!",
-        data: null
-      });
-    }
-  }).catch((err)=>{
-    console.log(err);
-    res.status(500).json({
-      code: 500,
-      msg: "failed!",
-      data: null
-    });
-  });
-});
+
+// // 离开房间 --房间人数
+// router.get("/leaveRoom", checkToken, disableCache, (req, res)=>{
+//   let { _id } = req.user;
+//   let { roomId } = req.query;
+//   if(!roomId){
+//     res.status(500).json({
+//       code: 500,
+//       msg: "server error!",
+//       data: null
+//     });
+//     return;
+//   }
+//   RoomModel.findOne({_id: roomId}).then((data)=>{
+//     if(data){
+//       if(data.roomPeopleNumber - 1 == 0){// 人走完房间里没人了
+//         // 移除这个人不再属于这个房间
+//         UserModel.updateOne({_id}, {$pull: {belongRoom: roomId}}).then((data)=>{
+//         }).catch((error)=>{
+//           console.log(error);
+//           res.status(503).json({
+//             code: 503,
+//             msg: "people failed",
+//             data: null
+//           });
+//         });
+//         // 删了这个房间就好
+//         RoomModel.deleteOne({_id: roomId}).then((data)=>{
+//           if(data.deletedCount === 1){
+//             res.status(200).json({
+//               code: 200,
+//               msg: "success",
+//               data: null
+//             });
+//           }else{
+//             res.status(206).json({
+//               code: 206,
+//               msg: "delete no one",
+//               data: null
+//             });
+//           }
+//         }).catch((error)=>{
+//           console.log(error);
+//           res.status(502).json({
+//             code: 502,
+//             msg: "delete room failed!",
+//             data: null
+//           });
+//         });
+//         return;
+//       }
+//       // 人走完房间里还有人
+//       RoomModel.updateOne({_id: data._id}, {roomPeopleNumber: data.roomPeopleNumber-1})
+//         .then((d)=>{
+//           // 移除这个人不再属于这个房间
+//           UserModel.updateOne({_id}, {$pull: {belongRoom: roomId}}).then((data)=>{
+//             res.status(200).json({
+//               code: 200,
+//               msg: "success!",
+//               data: null
+//             });
+//           }).catch((error)=>{
+//             console.log(error);
+//             res.status(503).json({
+//               code: 503,
+//               msg: "people failed",
+//               data: null
+//             });
+//           });
+//         }).catch((e)=>{
+//           console.log(e);
+//           res.status(501).json({
+//             code: 501,
+//             msg: "update failed!",
+//             data: null
+//           });
+//         });
+//     }else{  
+//       res.status(500).json({
+//         code: 500,
+//         msg: "failed!",
+//         data: null
+//       });
+//     }
+//   }).catch((err)=>{
+//     console.log(err);
+//     res.status(500).json({
+//       code: 500,
+//       msg: "failed!",
+//       data: null
+//     });
+//   });
+// });
 
 module.exports = router;

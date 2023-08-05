@@ -1,5 +1,6 @@
 module.exports = {
-  serect: "ChatRoomOfPC",
+  serect: "ChatRoomOfPC", //这个有用
+  // 目前而言，这里下面应该是没用的了
   list: [
     "gaoshuo",
     "liuxiaojun",
